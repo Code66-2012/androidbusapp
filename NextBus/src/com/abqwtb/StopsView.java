@@ -30,7 +30,7 @@ public class StopsView extends ListActivity  {
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		Log.v("Main","StopId:"+list[position].getId());
-		Intent i = new Intent(StopsView.this, StopView.class);
+		Intent i = new Intent(StopsView.this, ScheduleView.class);
 
 		i.putExtra("com.abqwtb.stop_id",list[position].getId());
 		i.putExtra("com.abqwtb.stop_name",list[position].toString());

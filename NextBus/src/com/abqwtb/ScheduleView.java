@@ -79,7 +79,13 @@ public class ScheduleView extends ListActivity {
 					try {
 						dateObj = sdf.parse(data[0]);
 						DateFormat df = DateFormat.getTimeInstance();
-						sched[i] = df.format(dateObj)+" ("+data[1]+")";
+						String late = data[2];
+						if (late.equals("-1")){
+							late = "";
+						}else if(late.equals("0")){
+							late = "On Time";
+						}
+						sched[i] = df.format(dateObj)+" ("+data[1]+") "+late;
 
 					} catch (ParseException e) {
 						e.printStackTrace();
@@ -105,7 +111,7 @@ public class ScheduleView extends ListActivity {
 		String inputLine = null;
 		try {
 			Log.v("Main","Loading from url...");
-			URL url = new URL("http://speedycomputing.net/nextbus/?version=2&stop_id="+id);
+			URL url = new URL("http://www.abqwtb.com/android.php?version=3&stop_id="+id);
 			conn = url.openConnection();
 			BufferedReader in = new BufferedReader(
 					new InputStreamReader(
