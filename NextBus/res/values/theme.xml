@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-<color name="custom_theme_color">#FFDB70</color>
-<style name="WTBTheme" parent="android:Theme">
-<!-- 	<item name="android:windowBackground">@color/custom_theme_color</item> -->
-<!-- 	<item name="android:colorBackground">@color/custom_theme_color</item> -->
-<!--     <item name="android:textColor">#F5003D</item> -->
-</style>
+
+    <color name="custom_theme_color">#F5F5F5</color>
+
+    <style name="WTBTheme" parent="android:Theme">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/custom_theme_color</item>
+        <item name="android:cacheColorHint">@color/custom_theme_color</item>
+        <item name="android:scrollingCache">false</item>
+        <!-- <item name="android:colorBackground">@color/custom_theme_color</item> -->
+        <item name="android:textColor">#000000</item>
+    </style>
+
 </resources>

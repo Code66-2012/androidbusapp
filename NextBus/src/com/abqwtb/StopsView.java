@@ -23,7 +23,7 @@ public class StopsView extends ListActivity  {
 	LocationManager locationManager;
 	LocationListener locationListener;
 
-	static Stop[] list = new Stop[]{new Stop(0,"Please Wait ...",0)};
+	static Stop[] list = new Stop[]{new Stop(0,"","Please Wait ...",0)};
 	private SQLiteDatabase db;
 	ArrayAdapter<Stop> adapter;
 
@@ -33,7 +33,7 @@ public class StopsView extends ListActivity  {
 		Intent i = new Intent(StopsView.this, ScheduleView.class);
 
 		i.putExtra("com.abqwtb.stop_id",list[position].getId());
-		i.putExtra("com.abqwtb.stop_name",list[position].toString());
+		i.putExtra("com.abqwtb.stop_name",list[position].getShortName());
 
 		StopsView.this.startActivity(i);
 		super.onListItemClick(l, v, position, id);
@@ -126,7 +126,7 @@ public class StopsView extends ListActivity  {
 		//latitude = 35.075896;
 		//Log.v("Location",latitude+" "+longitude);
 
-		Cursor cursor = db.rawQuery("SELECT * FROM `stops_local` WHERE `stop_lat` > "+(latitude-0.006)+" AND `stop_lat` < "+(latitude+0.006)+" AND `stop_lon` > "+(longitude-0.006)+" AND `stop_lon` < "+(longitude+0.006)+"", null);
+		Cursor cursor = db.rawQuery("SELECT * FROM `stops` WHERE `lat` > "+(latitude-0.006)+" AND `lat` < "+(latitude+0.006)+" AND `lon` > "+(longitude-0.006)+" AND `lon` < "+(longitude+0.006)+"", null);
 
 
 		cursor.moveToFirst();
@@ -140,12 +140,13 @@ public class StopsView extends ListActivity  {
 			Cursor cursor1 = db.rawQuery("SELECT * FROM `routes_map` WHERE `stop` = "+cursor.getInt(3), null);
 			String stop_name = cursor.getString(4);
 			cursor1.moveToFirst();
+			String stop_name_long = stop_name;
 			while (cursor1.isAfterLast() == false){
-				stop_name += "("+cursor1.getInt(0)+")";
+				stop_name_long += "("+cursor1.getInt(0)+")";
 				cursor1.moveToNext();
 			}
-			stop_name += "("+cursor.getString(5)+")";
-			temp[i]  = new Stop(dist,stop_name,cursor.getInt(3));
+			stop_name_long += "("+cursor.getString(5)+")";
+			temp[i]  = new Stop(dist,stop_name,stop_name_long,cursor.getInt(3));
 			i++;
 			cursor.moveToNext();
 		}

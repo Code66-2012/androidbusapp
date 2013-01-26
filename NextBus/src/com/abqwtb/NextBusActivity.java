@@ -57,7 +57,7 @@ public class NextBusActivity extends Activity {
 
 		Log.v("Location",latitude+" "+longitude);
 		
-		Cursor cursor = db.rawQuery("SELECT * FROM `stops_simple` WHERE `stop_lat` > "+(latitude-0.002)+" AND `stop_lat` < "+(latitude+0.002)+" AND `stop_lon` > "+(longitude-0.002)+" AND `stop_lon` < "+(longitude+0.002)+"", null);
+		Cursor cursor = db.rawQuery("SELECT * FROM `stops` WHERE `lat` > "+(latitude-0.002)+" AND `lat` < "+(latitude+0.002)+" AND `lon` > "+(longitude-0.002)+" AND `lon` < "+(longitude+0.002)+"", null);
 		
 		
 		cursor.moveToFirst();

@@ -6,20 +6,25 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class ScheduleView extends ListActivity {
 
 	private String[] sched = {"Loading..."};
+	private String[] bus_ids;
 	private int id;
 
 	final Handler mHandler = new Handler();
@@ -42,7 +47,17 @@ public class ScheduleView extends ListActivity {
 			updateUI();
 			refreshSched();
 		}
-		
+
+	}
+
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		if (position < bus_ids.length){
+			Intent i = new Intent(ScheduleView.this, BusView.class);
+			i.putExtra("com.abqwtb.bus_id", bus_ids[position]);
+			ScheduleView.this.startActivity(i);
+		}
+		super.onListItemClick(l, v, position, id);
 	}
 
 
@@ -63,13 +78,14 @@ public class ScheduleView extends ListActivity {
 		TextView v = (TextView) findViewById(R.id.stop_name);
 
 		v.setText(name+" "+getString(R.string.schedule));
-		
+
 		Thread t = new Thread() {
 			@Override
 			public void run() {
 				String times = serverQuery(id+"");
 				sched = times.split("\\|");
 
+				bus_ids = new String[sched.length];
 				final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
 				for (int i = 0; i < sched.length; i++) {
@@ -84,8 +100,13 @@ public class ScheduleView extends ListActivity {
 							late = "";
 						}else if(late.equals("0")){
 							late = "On Time";
+						}else{
+							NumberFormat nf = NumberFormat.getInstance();
+							nf.setMaximumFractionDigits(1);
+							late = "~" +  nf.format(Float.parseFloat(late) / 60) + " Minutes Late";
 						}
 						sched[i] = df.format(dateObj)+" ("+data[1]+") "+late;
+						bus_ids[i] = data[3];
 
 					} catch (ParseException e) {
 						e.printStackTrace();
@@ -111,20 +132,15 @@ public class ScheduleView extends ListActivity {
 		String inputLine = null;
 		try {
 			Log.v("Main","Loading from url...");
-			URL url = new URL("http://www.abqwtb.com/android.php?version=3&stop_id="+id);
+			URL url = new URL("http://www.abqwtb.com/android.php?version=4&stop_id="+id);
 			conn = url.openConnection();
-			BufferedReader in = new BufferedReader(
-					new InputStreamReader(
-							conn.getInputStream()));
-
-
+			BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 			while ((inputLine = in.readLine()) != null){ 
 				Log.v("Main",";"+inputLine);
 				return inputLine;
 			}
 			in.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return "Server Error";
