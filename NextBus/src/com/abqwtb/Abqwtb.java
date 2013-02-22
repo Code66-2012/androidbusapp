@@ -3,65 +3,87 @@ package com.abqwtb;
 import java.io.IOException;
 import java.util.Arrays;
 
+import android.R.id;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class StopsView extends ListActivity  {
+public class Abqwtb extends ListActivity  {
 
 	LocationManager locationManager;
 	LocationListener locationListener;
 
+	Location loc;
+
 	static Stop[] list = new Stop[]{new Stop(0,"","Please Wait ...",0)};
 	private SQLiteDatabase db;
 	ArrayAdapter<Stop> adapter;
+	private String provider;
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		Log.v("Main","StopId:"+list[position].getId());
-		Intent i = new Intent(StopsView.this, ScheduleView.class);
+		if (list[position].getId() >0){
+			Log.v("Main","StopId:"+list[position].getId());
+			Intent i = new Intent(Abqwtb.this, ScheduleView.class);
 
-		i.putExtra("com.abqwtb.stop_id",list[position].getId());
-		i.putExtra("com.abqwtb.stop_name",list[position].getShortName());
+			i.putExtra("com.abqwtb.stop_id",list[position].getId());
+			i.putExtra("com.abqwtb.stop_name",list[position].getShortName());
 
-		StopsView.this.startActivity(i);
+			Abqwtb.this.startActivity(i);
+		}
 		super.onListItemClick(l, v, position, id);
+
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-
 		loadDatabase();
 
 		adapter = new ArrayAdapter<Stop>(this,R.layout.item_layout, list);
 		setListAdapter(adapter);
 
-		// Acquire a reference to the system Location Manager
-		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-		if (locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null){
-			Location loc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		String context = Context.LOCATION_SERVICE; 
+		locationManager = (LocationManager) this.getSystemService(context); 
+		Criteria criteria = new Criteria(); 
+		criteria.setAccuracy(Criteria.ACCURACY_FINE); 
+		criteria.setAltitudeRequired(false); 
+		criteria.setBearingRequired(false); 
+		criteria.setCostAllowed(true); 
+		provider = locationManager.getBestProvider(criteria, false); 
 
-			reloadLocation(loc);
-		}
+		loc = locationManager.getLastKnownLocation(provider);
+
+		reloadLocation();
+
+		// Acquire a reference to the system Location Manager
+
+		final ListView v = (ListView) findViewById(id.list);
 
 		// Define a listener that responds to location updates
 		locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
-				// Called when a new location is found by the network location provider.
-				reloadLocation(location);
+				loc = location;
+				if (v.getFirstVisiblePosition() == 0){
+					reloadLocation();
+				}
 			}
 
 			public void onStatusChanged(String provider, int status, Bundle extras) {}
@@ -81,7 +103,10 @@ public class StopsView extends ListActivity  {
 	protected void onStart(){
 		super.onStart();
 		// Register the listener with the Location Manager to receive location updates
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		locationManager
+		.requestLocationUpdates(
+				provider, 5 * 1000, 0, 
+				locationListener);
 	}
 
 	@Override
@@ -118,9 +143,12 @@ public class StopsView extends ListActivity  {
 
 	}
 
-	public void reloadLocation(Location location){
-		double longitude = location.getLongitude();
-		double latitude = location.getLatitude();
+	public void reloadLocation(){
+		if (loc == null){
+			return;
+		}
+		double longitude = loc.getLongitude();
+		double latitude = loc.getLatitude();
 
 		//longitude = -106.568586;
 		//latitude = 35.075896;
@@ -156,6 +184,27 @@ public class StopsView extends ListActivity  {
 
 		adapter = new ArrayAdapter<Stop>(this,R.layout.item_layout, list);
 		setListAdapter(adapter);
+
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.mainmenu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item){
+		Log.v("menu", ""+item.getItemId());
+		if (item.getItemId() == R.id.www){
+			String url = "http://www.abqwtb.com/?utm_source=app&utm_medium=app&utm_campaign=Android%2Bapp";
+			Intent i = new Intent(Intent.ACTION_VIEW);
+			i.setData(Uri.parse(url));
+			startActivity(i);
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 
 	}
 

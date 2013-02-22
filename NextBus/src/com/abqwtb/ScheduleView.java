@@ -24,7 +24,7 @@ import android.widget.TextView;
 public class ScheduleView extends ListActivity {
 
 	private String[] sched = {"Loading..."};
-	private String[] bus_ids;
+	private String[] bus_ids = new String[0];
 	private int id;
 
 	final Handler mHandler = new Handler();
@@ -52,7 +52,7 @@ public class ScheduleView extends ListActivity {
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		if (position < bus_ids.length){
+		if (position < bus_ids.length && bus_ids[position].length() > 1){
 			Intent i = new Intent(ScheduleView.this, BusView.class);
 			i.putExtra("com.abqwtb.bus_id", bus_ids[position]);
 			ScheduleView.this.startActivity(i);
@@ -106,10 +106,13 @@ public class ScheduleView extends ListActivity {
 							late = "~" +  nf.format(Float.parseFloat(late) / 60) + " Minutes Late";
 						}
 						sched[i] = df.format(dateObj)+" ("+data[1]+") "+late;
-						bus_ids[i] = data[3];
-
 					} catch (ParseException e) {
 						e.printStackTrace();
+					}
+					if (data.length > 3){
+						bus_ids[i] = data[3];
+					}else{
+						bus_ids[i] = " ";
 					}
 				}
 

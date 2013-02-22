@@ -10,8 +10,6 @@
         android:layout_height="wrap_content"
         android:text="@string/stops_near"
         android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    
     
     <ListView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@android:id/list"
