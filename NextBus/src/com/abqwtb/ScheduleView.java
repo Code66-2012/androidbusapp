@@ -9,7 +9,10 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+
+import com.google.analytics.tracking.android.EasyTracker;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -23,8 +26,9 @@ import android.widget.TextView;
 
 public class ScheduleView extends ListActivity {
 
-	private String[] sched = {"Loading..."};
-	private String[] bus_ids = new String[0];
+	private String[] sched;
+	private ArrayList<String> schedule = new ArrayList<String>();
+	private ArrayList<String> bus_ids = new ArrayList<String>();
 	private int id;
 
 	final Handler mHandler = new Handler();
@@ -52,9 +56,9 @@ public class ScheduleView extends ListActivity {
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		if (position < bus_ids.length && bus_ids[position].length() > 1){
+		if (position < bus_ids.size() && bus_ids.get(position).length() > 1){
 			Intent i = new Intent(ScheduleView.this, BusView.class);
-			i.putExtra("com.abqwtb.bus_id", bus_ids[position]);
+			i.putExtra("com.abqwtb.bus_id", bus_ids.get(position));
 			ScheduleView.this.startActivity(i);
 		}
 		super.onListItemClick(l, v, position, id);
@@ -65,7 +69,14 @@ public class ScheduleView extends ListActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
+		EasyTracker.getInstance().activityStart(this);
 
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		EasyTracker.getInstance().activityStop(this);
 	}
 
 	private void refreshSched(){
@@ -85,34 +96,40 @@ public class ScheduleView extends ListActivity {
 				String times = serverQuery(id+"");
 				sched = times.split("\\|");
 
-				bus_ids = new String[sched.length];
+				bus_ids = new ArrayList<String>();
 				final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-
+				schedule = new ArrayList<String>();
 				for (int i = 0; i < sched.length; i++) {
-
 					String[] data = sched[i].split(";");
 					Date dateObj;
 					try {
 						dateObj = sdf.parse(data[0]);
 						DateFormat df = DateFormat.getTimeInstance();
 						String late = data[2];
+
 						if (late.equals("-1")){
 							late = "";
+
 						}else if(late.equals("0")){
 							late = "On Time";
+
 						}else{
 							NumberFormat nf = NumberFormat.getInstance();
 							nf.setMaximumFractionDigits(1);
-							late = "~" +  nf.format(Float.parseFloat(late) / 60) + " Minutes Late";
+							float time_late = Float.parseFloat(late);
+							late = "~" +  nf.format(time_late / 60) + " Minutes Late";
+
 						}
-						sched[i] = df.format(dateObj)+" ("+data[1]+") "+late;
+
+						schedule.add(df.format(dateObj)+" ("+data[1]+") "+late);
+						if (data.length > 3){
+							bus_ids.add(data[3]);
+						}else{
+							bus_ids.add(" ");
+						}
+
 					} catch (ParseException e) {
 						e.printStackTrace();
-					}
-					if (data.length > 3){
-						bus_ids[i] = data[3];
-					}else{
-						bus_ids[i] = " ";
 					}
 				}
 
@@ -124,7 +141,7 @@ public class ScheduleView extends ListActivity {
 	}
 
 	private void updateUI(){
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, sched);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, schedule);
 		setListAdapter(adapter);
 
 	}
@@ -135,7 +152,7 @@ public class ScheduleView extends ListActivity {
 		String inputLine = null;
 		try {
 			Log.v("Main","Loading from url...");
-			URL url = new URL("http://www.abqwtb.com/android.php?version=4&stop_id="+id);
+			URL url = new URL("http://www.abqwtb.com/android.php?version=5&stop_id="+id);
 			conn = url.openConnection();
 			BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 			while ((inputLine = in.readLine()) != null){ 

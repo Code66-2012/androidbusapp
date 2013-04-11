@@ -3,6 +3,8 @@ package com.abqwtb;
 import java.io.IOException;
 import java.util.Arrays;
 
+import com.google.analytics.tracking.android.EasyTracker;
+
 import android.R.id;
 import android.app.ListActivity;
 import android.content.Context;
@@ -62,12 +64,7 @@ public class Abqwtb extends ListActivity  {
 
 		String context = Context.LOCATION_SERVICE; 
 		locationManager = (LocationManager) this.getSystemService(context); 
-		Criteria criteria = new Criteria(); 
-		criteria.setAccuracy(Criteria.ACCURACY_FINE); 
-		criteria.setAltitudeRequired(false); 
-		criteria.setBearingRequired(false); 
-		criteria.setCostAllowed(true); 
-		provider = locationManager.getBestProvider(criteria, false); 
+		provider = LocationManager.NETWORK_PROVIDER; 
 
 		loc = locationManager.getLastKnownLocation(provider);
 
@@ -102,17 +99,25 @@ public class Abqwtb extends ListActivity  {
 	@Override
 	protected void onStart(){
 		super.onStart();
+		EasyTracker.getInstance().activityStart(this);
 		// Register the listener with the Location Manager to receive location updates
-		locationManager
-		.requestLocationUpdates(
-				provider, 5 * 1000, 0, 
-				locationListener);
+		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5 * 1000, 0,locationListener);
+		}else{
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5*1000, 0, locationListener);
+		}
 	}
 
 	@Override
 	protected void onPause(){
 		super.onPause();
 		locationManager.removeUpdates(locationListener);
+	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		EasyTracker.getInstance().activityStop(this);
 	}
 
 	private void loadDatabase() {

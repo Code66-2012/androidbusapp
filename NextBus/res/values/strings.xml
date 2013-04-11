@@ -4,5 +4,4 @@
     <string name="app_name">ABQ Bus</string>
     <string name="stops_near">Nearest Stops:</string>
     <string name="schedule">Schedule</string>
-    <string name="rt">Real-Time</string>
 </resources>
