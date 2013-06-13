@@ -122,30 +122,22 @@ public class Abqwtb extends ListActivity  {
 
 	private void loadDatabase() {
 		DatabaseHelper myDbHelper = new DatabaseHelper(getApplicationContext());
-		myDbHelper = new DatabaseHelper(this);
 
 		try {
-
-			myDbHelper.createDataBase();
-
-		} catch (IOException ioe) {
-
-			throw new Error("Unable to create database");
-
-		}
-
-		try {
-
 			myDbHelper.openDataBase();
-
-		}catch(SQLException sqle){
-
-			throw sqle;
-
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 		db = myDbHelper.getDatabase();
-
+	}
+	
+	@Override
+	protected void onDestroy() {
+		db.close();
+		super.onDestroy();
 	}
 
 	public void reloadLocation(){

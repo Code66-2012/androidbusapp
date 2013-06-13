@@ -3,4 +3,9 @@
     <string name="app_name">ABQ Autobús</string>
     <string name="stops_near">Paradas más cercanas:</string>
     <string name="schedule">programar:</string>
+    <string name="refresh">Actualizar</string>
+    <string name="next_stop">Próxima Parada</string>
+    <string name="on_time">A Tiempo</string>
+    <string name="late">Minutos Tarde</string>
+    <string name="wrefresh">Espera para Actualizar</string>
 </resources>

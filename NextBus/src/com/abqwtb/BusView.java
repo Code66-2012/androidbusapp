@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.google.analytics.tracking.android.EasyTracker;
 
@@ -16,17 +18,30 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class BusView extends Activity{
+public class BusView extends Activity implements OnClickListener{
 
 	Bitmap bmp;
 	String[] info;
+	Button refresh;
 	
 	final Handler mHandler = new Handler();
-
+	
+	final Runnable mUpdateRefresh = new Runnable() {
+		@Override
+		public void run() {
+			refresh.setEnabled(true);
+			refresh.setText(R.string.refresh);
+		}
+	};
+	
 	final Runnable mUpdateResults = new Runnable() {
+		@Override
 		public void run() {
 			updateUI();
 		}
@@ -38,17 +53,10 @@ public class BusView extends Activity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.bus);
 		bus_id = getIntent().getExtras().getString("com.abqwtb.bus_id");
-		Thread t = new Thread(){
-			public void run() {
-				info = serverQuery(bus_id).split(":");
-				
-				bmp = getBitmapMap("http://www.mapquestapi.com/staticmap/v3/getmap?key=Fmjtd%7Cluub290yn9%2Cbx%3Do5-96zs9y&center="+info[1]+","+info[2]+"&zoom=10&size=300,200&type=map&imagetype=jpeg&pois=pcenter,"+info[1]+","+info[2]+",5,0");
-				mHandler.post(mUpdateResults);
-				
-			}
-		};
-		
-		t.start();
+		refresh = (Button) findViewById(R.id.bus_refresh);
+		refresh.setEnabled(false);
+		refresh.setOnClickListener(this);
+		new UpdateThread().start();
 
 	}
 
@@ -56,8 +64,7 @@ public class BusView extends Activity{
 		ImageView map = (ImageView) findViewById(R.id.busMap);
 		map.setImageBitmap(bmp);
 		TextView v = (TextView) findViewById(R.id.bus_id);
-		v.setText(bus_id + " Next Stop:  "+info[0]);
-		
+		v.setText(bus_id + " "+getString(R.string.next_stop)+":  "+info[0]);
 	}
 
 	public static Bitmap getBitmapMap(String src) {
@@ -108,5 +115,21 @@ public class BusView extends Activity{
 		super.onStop();
 		EasyTracker.getInstance().activityStop(this);
 	}
+
+	@Override
+	public void onClick(View v) {
+		refresh.setEnabled(false);
+		refresh.setText(R.string.wrefresh);
+		new UpdateThread().start();		
+	}
+	
+	class UpdateThread extends Thread{
+		public void run() {
+			info = serverQuery(bus_id).split(":");
+			bmp = getBitmapMap("http://www.mapquestapi.com/staticmap/v3/getmap?key=Fmjtd%7Cluub290yn9%2Cbx%3Do5-96zs9y&center="+info[1]+","+info[2]+"&zoom=10&size=300,200&type=map&imagetype=jpeg&pois=pcenter,"+info[1]+","+info[2]+",5,0");
+			mHandler.post(mUpdateResults);
+			mHandler.postDelayed(mUpdateRefresh, 60000);
+		}
+	};
 
 }

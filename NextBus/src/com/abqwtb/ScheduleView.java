@@ -94,45 +94,48 @@ public class ScheduleView extends ListActivity {
 			@Override
 			public void run() {
 				String times = serverQuery(id+"");
-				sched = times.split("\\|");
+				if (times.contains("No More Stops Today")){
+					schedule = new ArrayList<String>();
+					schedule.add("No More Stops Today");
+				}else{
+					sched = times.split("\\|");
 
-				bus_ids = new ArrayList<String>();
-				final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-				schedule = new ArrayList<String>();
-				for (int i = 0; i < sched.length; i++) {
-					String[] data = sched[i].split(";");
-					Date dateObj;
-					try {
-						dateObj = sdf.parse(data[0]);
-						DateFormat df = DateFormat.getTimeInstance();
-						String late = data[2];
+					bus_ids = new ArrayList<String>();
+					final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+					schedule = new ArrayList<String>();
+					for (int i = 0; i < sched.length; i++) {
+						String[] data = sched[i].split(";");
+						Date dateObj;
+						try {
+							dateObj = sdf.parse(data[0]);
+							DateFormat df = DateFormat.getTimeInstance();
+							String late = data[2];
 
-						if (late.equals("-1")){
-							late = "";
+							if (late.equals("-1")){
+								late = "";
 
-						}else if(late.equals("0")){
-							late = "On Time";
+							}else if(late.equals("0")){
+								late = getString(R.string.on_time);
+							}else{
+								NumberFormat nf = NumberFormat.getInstance();
+								nf.setMaximumFractionDigits(1);
+								float time_late = Float.parseFloat(late);
+								late = "~" +  nf.format(time_late / 60) + " "+getString(R.string.late);
 
-						}else{
-							NumberFormat nf = NumberFormat.getInstance();
-							nf.setMaximumFractionDigits(1);
-							float time_late = Float.parseFloat(late);
-							late = "~" +  nf.format(time_late / 60) + " Minutes Late";
+							}
 
+							schedule.add(df.format(dateObj)+" ("+data[1]+") "+late);
+							if (data.length > 3){
+								bus_ids.add(data[3]);
+							}else{
+								bus_ids.add(" ");
+							}
+
+						} catch (ParseException e) {
+							e.printStackTrace();
 						}
-
-						schedule.add(df.format(dateObj)+" ("+data[1]+") "+late);
-						if (data.length > 3){
-							bus_ids.add(data[3]);
-						}else{
-							bus_ids.add(" ");
-						}
-
-					} catch (ParseException e) {
-						e.printStackTrace();
 					}
 				}
-
 				mHandler.post(mUpdateResults);
 			}
 		};
