@@ -6,6 +6,7 @@ import java.util.Arrays;
 import com.google.analytics.tracking.android.EasyTracker;
 
 import android.R.id;
+import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
@@ -23,11 +24,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
-public class Abqwtb extends ListActivity  {
+public class Abqwtb extends Activity  {
 
 	LocationManager locationManager;
 	LocationListener locationListener;
@@ -38,21 +42,22 @@ public class Abqwtb extends ListActivity  {
 	private SQLiteDatabase db;
 	ArrayAdapter<Stop> adapter;
 	private String provider;
+	private LinearLayout l;
 
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		if (list[position].getId() >0){
-			Log.v("Main","StopId:"+list[position].getId());
-			Intent i = new Intent(Abqwtb.this, ScheduleView.class);
-
-			i.putExtra("com.abqwtb.stop_id",list[position].getId());
-			i.putExtra("com.abqwtb.stop_name",list[position].getShortName());
-
-			Abqwtb.this.startActivity(i);
-		}
-		super.onListItemClick(l, v, position, id);
-
-	}
+//	@Override
+//	protected void onListItemClick(ListView l, View v, int position, long id) {
+//		if (list[position].getId() >0){
+//			Log.v("Main","StopId:"+list[position].getId());
+//			Intent i = new Intent(Abqwtb.this, ScheduleView.class);
+//
+//			i.putExtra("com.abqwtb.stop_id",list[position].getId());
+//			i.putExtra("com.abqwtb.stop_name",list[position].getShortName());
+//
+//			Abqwtb.this.startActivity(i);
+//		}
+//		super.onListItemClick(l, v, position, id);
+//
+//	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,27 +66,27 @@ public class Abqwtb extends ListActivity  {
 		loadDatabase();
 
 		adapter = new ArrayAdapter<Stop>(this,R.layout.item_layout,R.id.stop_text, list);
-		setListAdapter(adapter);
+		//setListAdapter(adapter);
 
 		String context = Context.LOCATION_SERVICE; 
 		locationManager = (LocationManager) this.getSystemService(context); 
 		provider = LocationManager.NETWORK_PROVIDER; 
 
 		loc = locationManager.getLastKnownLocation(provider);
-
+		l = (LinearLayout) findViewById(R.id.stops_layout);
 		reloadLocation();
 
 		// Acquire a reference to the system Location Manager
 
-		final ListView v = (ListView) findViewById(id.list);
+		//final ListView v = (ListView) findViewById(id.list);
 
 		// Define a listener that responds to location updates
 		locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
 				loc = location;
-				if (v.getFirstVisiblePosition() == 0){
+//				if (v.getFirstVisiblePosition() == 0){
 					reloadLocation();
-				}
+//				}
 			}
 
 			public void onStatusChanged(String provider, int status, Bundle extras) {}
@@ -94,7 +99,7 @@ public class Abqwtb extends ListActivity  {
 
 			}
 		};
-
+		
 	}
 
 	@Override
@@ -180,8 +185,17 @@ public class Abqwtb extends ListActivity  {
 
 		list = temp;
 
-		adapter = new ArrayAdapter<Stop>(this,R.layout.item_layout,R.id.stop_text, list);
-		setListAdapter(adapter);
+		for (int j = 0; j < list.length; j++) {
+			TextView t = new TextView(this);
+			t.setId(j);
+			t.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+			t.setText(list[j].toString());
+			l.addView(t);
+			
+		}
+		
+		//adapter = new ArrayAdapter<Stop>(this,R.layout.item_layout,R.id.stop_text, list);
+		//setListAdapter(adapter);
 
 	}
 
