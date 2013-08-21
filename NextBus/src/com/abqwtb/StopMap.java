@@ -7,7 +7,7 @@ import com.mapquest.android.maps.MapActivity;
 import com.mapquest.android.maps.MapView;
 import com.mapquest.android.maps.MyLocationOverlay;
 
-public class Map extends MapActivity {
+public class StopMap extends MapActivity {
 
 	private MyLocationOverlay myLocationOverlay;
 	private MapView map;

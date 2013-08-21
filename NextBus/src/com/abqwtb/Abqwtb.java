@@ -25,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 
 public class Abqwtb extends ListActivity  {
 
@@ -59,7 +60,7 @@ public class Abqwtb extends ListActivity  {
 		setContentView(R.layout.main);
 		loadDatabase();
 
-		adapter = new ArrayAdapter<Stop>(this,R.layout.item_layout, list);
+		adapter = new ArrayAdapter<Stop>(this,R.layout.item_layout,R.id.stop_text, list);
 		setListAdapter(adapter);
 
 		String context = Context.LOCATION_SERVICE; 
@@ -159,19 +160,19 @@ public class Abqwtb extends ListActivity  {
 		int i = 0;
 		while (cursor.isAfterLast() == false) 
 		{
-			double x_dist = latitude - cursor.getDouble(0);
+			double x_dist = latitude - cursor.getDouble(1);
 			double y_dist = longitude - cursor.getDouble(2);
 			double dist = Math.sqrt((x_dist*x_dist)+(y_dist*y_dist));
-			Cursor cursor1 = db.rawQuery("SELECT * FROM `routes_map` WHERE `stop` = "+cursor.getInt(3), null);
-			String stop_name = cursor.getString(4);
+			Cursor cursor1 = db.rawQuery("SELECT * FROM `routes` WHERE `stop` = "+cursor.getInt(0), null);
+			String stop_name = cursor.getString(3);
 			cursor1.moveToFirst();
 			String stop_name_long = stop_name;
 			while (cursor1.isAfterLast() == false){
-				stop_name_long += "("+cursor1.getInt(0)+")";
+				stop_name_long += "("+cursor1.getInt(1)+")";
 				cursor1.moveToNext();
 			}
-			stop_name_long += "("+cursor.getString(5)+")";
-			temp[i]  = new Stop(dist,stop_name,stop_name_long,cursor.getInt(3));
+			stop_name_long += "("+cursor.getString(4)+")";
+			temp[i]  = new Stop(dist,stop_name,stop_name_long,cursor.getInt(0));
 			i++;
 			cursor.moveToNext();
 		}
@@ -179,7 +180,7 @@ public class Abqwtb extends ListActivity  {
 
 		list = temp;
 
-		adapter = new ArrayAdapter<Stop>(this,R.layout.item_layout, list);
+		adapter = new ArrayAdapter<Stop>(this,R.layout.item_layout,R.id.stop_text, list);
 		setListAdapter(adapter);
 
 	}

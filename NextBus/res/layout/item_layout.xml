@@ -1,11 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/text1" 
-    android:layout_width="fill_parent" 
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content" 
-    android:textAppearance="?android:attr/textAppearanceMedium" 
-    android:gravity="center_vertical" 
-    android:paddingLeft="6dip" 
-    android:minHeight="?android:attr/listPreferredItemHeight" >
+    android:padding="3dp">
+
+    <ImageView
+        android:id="@+id/sign_view"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/sign" />
+
+    <TextView
+        android:id="@+id/stop_text"
+        android:layout_width="wrap_content"
+        android:layout_toRightOf="@+id/sign_view"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="1dp"
+        android:layout_marginTop="1dp"
+        android:gravity="center_vertical"
+        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:paddingLeft="6dip"
+        android:textAppearance="?android:attr/textAppearanceMedium" >
+    </TextView>
+
     
-</TextView>
+
+</RelativeLayout>
