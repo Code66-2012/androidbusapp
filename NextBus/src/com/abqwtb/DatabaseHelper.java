@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -39,8 +40,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 	 * @throws IOException 
 	 * */
 	private void copyDataBase() throws IOException{
-		SQLiteDatabase db = this.getReadableDatabase();
-		db.close();
+		//SQLiteDatabase db = this.getReadableDatabase();
+		//db.close();
 		//Open your local db as the input stream
 		InputStream myInput;
 		myInput = myContext.getAssets().open("stops");
@@ -66,6 +67,11 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
 		try{
 			myDataBase = SQLiteDatabase.openDatabase(DB_PATH,null, 0);
+			Cursor c = myDataBase.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = 'version'", null);
+			if (c == null || c.getCount() < 1){
+				myDataBase.close();
+				throw new Exception("Database is old");
+			}
 		}catch(Exception e){
 			//e.printStackTrace();
 			Log.v("databse","Copying Database");

@@ -29,7 +29,10 @@ import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
@@ -38,7 +41,7 @@ import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-public class Abqwtb extends Activity  {
+public class Abqwtb extends Activity implements OnClickListener, OnTouchListener  {
 
 	LocationManager locationManager;
 	LocationListener locationListener;
@@ -51,20 +54,19 @@ public class Abqwtb extends Activity  {
 	private String provider;
 	private LinearLayout l;
 
-//	@Override
-//	protected void onListItemClick(ListView l, View v, int position, long id) {
-//		if (list[position].getId() >0){
-//			Log.v("Main","StopId:"+list[position].getId());
-//			Intent i = new Intent(Abqwtb.this, ScheduleView.class);
-//
-//			i.putExtra("com.abqwtb.stop_id",list[position].getId());
-//			i.putExtra("com.abqwtb.stop_name",list[position].getShortName());
-//
-//			Abqwtb.this.startActivity(i);
-//		}
-//		super.onListItemClick(l, v, position, id);
-//
-//	}
+
+	public void onClick(View v) {
+		int id = v.getId() - 300;
+		if (list[id].getId() >0){
+			Log.v("Main","StopId:"+list[id].getId());
+			Intent i = new Intent(Abqwtb.this, ScheduleView.class);
+
+			i.putExtra("com.abqwtb.stop_id",list[id].getId());
+			i.putExtra("com.abqwtb.stop_name",list[id].getShortName());
+
+			Abqwtb.this.startActivity(i);
+		}
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -211,24 +213,32 @@ public class Abqwtb extends Activity  {
 			TextView t = new TextView(this);
 			t.setTextSize(24.00f);
 			t.setId(j+100);
-			t.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
+			t.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT));
 			t.setText(list[j].toString());
 			rl.addView(t);
 			int k = 0;
 			for (Integer route : list[j].getRoutes()) {
 				TextView r = new TextView(this);
+				r.setTextSize(20f);
 				r.setId(500+(100*j)+k);
 				r.setText(route+"");
 				r.setBackgroundColor(colors.get(route));
 				RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
 				p.addRule(RelativeLayout.BELOW, t.getId());
 				if (k>0)p.addRule(RelativeLayout.RIGHT_OF, 500+(100*j)+(k-1));
+				p.setMargins(15, 0, 0, 0);
+				r.setPadding(2, 2, 2, 2);
 				r.setLayoutParams(p);
 				rl.addView(r);
+				
 				k++;
 			}
+			rl.setOnClickListener(this);
+			rl.setOnTouchListener(this);
+			//rl.setBackgroundDrawable(getResources().getDrawable(R.drawable.colors));
 			rl.setId(j+300);
 			rl.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
+			rl.setBackgroundColor(Color.WHITE);
 			l.addView(rl,j+1);
 		}
 		
@@ -256,6 +266,16 @@ public class Abqwtb extends Activity  {
 		}
 		return super.onOptionsItemSelected(item);
 
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		if (event.getAction() == MotionEvent.ACTION_DOWN){
+			v.setBackgroundColor(Color.DKGRAY);
+		}else if(event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL){
+			v.setBackgroundColor(Color.WHITE);
+		}
+		return false;
 	}
 
 }
