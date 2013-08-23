@@ -22,11 +22,20 @@
         android:layout_marginRight="1dp"
         android:layout_marginTop="1dp"
         android:gravity="center_vertical"
-        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:text="Central @ Louissiana"
         android:paddingLeft="6dip"
         android:textAppearance="?android:attr/textAppearanceMedium" >
     </TextView>
 
-    
+    <TextView
+        android:id="@+id/route"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/stop_text"
+        android:layout_alignParentLeft="true"
+        android:layout_toRightOf="@+id/sign_view"
+        android:text="66"
+        android:layout_below="@+id/stop_text"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout>

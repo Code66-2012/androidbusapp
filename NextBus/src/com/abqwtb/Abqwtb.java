@@ -2,6 +2,10 @@ package com.abqwtb;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.analytics.tracking.android.EasyTracker;
 
@@ -13,6 +17,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -20,6 +25,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,6 +34,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -38,7 +45,7 @@ public class Abqwtb extends Activity  {
 
 	Location loc;
 
-	static Stop[] list = new Stop[]{new Stop(0,"","Please Wait ...",0)};
+	static Stop[] list = new Stop[]{new Stop(0,"","Please Wait ...",0,null)};
 	private SQLiteDatabase db;
 	ArrayAdapter<Stop> adapter;
 	private String provider;
@@ -172,26 +179,57 @@ public class Abqwtb extends Activity  {
 			String stop_name = cursor.getString(3);
 			cursor1.moveToFirst();
 			String stop_name_long = stop_name;
+			Set<Integer> routes = new HashSet<Integer>();
 			while (cursor1.isAfterLast() == false){
-				stop_name_long += "("+cursor1.getInt(1)+")";
+				routes.add(cursor1.getInt(1));
 				cursor1.moveToNext();
 			}
 			stop_name_long += "("+cursor.getString(4)+")";
-			temp[i]  = new Stop(dist,stop_name,stop_name_long,cursor.getInt(0));
+			temp[i]  = new Stop(dist,stop_name,stop_name_long,cursor.getInt(0),routes);
 			i++;
 			cursor.moveToNext();
 		}
 		Arrays.sort(temp);
 
 		list = temp;
-
+		
+		SparseIntArray colors = new SparseIntArray();
+		Cursor cursor1 = db.rawQuery("SELECT * FROM `routeinfo`",null);
+		cursor1.moveToFirst();
+		while(cursor1.isAfterLast() == false)
+		{
+			colors.put(cursor1.getInt(0), Color.parseColor("#"+cursor1.getString(2)));
+			cursor1.moveToNext();
+		}
+		for (int j = 0; j < l.getChildCount(); j++) {
+			View child = l.getChildAt(j);
+			if (child.getId() != R.id.stops_near)l.removeView(child);
+		}
+		
 		for (int j = 0; j < list.length; j++) {
+			RelativeLayout rl = new RelativeLayout(this);
 			TextView t = new TextView(this);
-			t.setId(j);
-			t.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+			t.setTextSize(24.00f);
+			t.setId(j+100);
+			t.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
 			t.setText(list[j].toString());
-			l.addView(t);
-			
+			rl.addView(t);
+			int k = 0;
+			for (Integer route : list[j].getRoutes()) {
+				TextView r = new TextView(this);
+				r.setId(500+(100*j)+k);
+				r.setText(route+"");
+				r.setBackgroundColor(colors.get(route));
+				RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+				p.addRule(RelativeLayout.BELOW, t.getId());
+				if (k>0)p.addRule(RelativeLayout.RIGHT_OF, 500+(100*j)+(k-1));
+				r.setLayoutParams(p);
+				rl.addView(r);
+				k++;
+			}
+			rl.setId(j+300);
+			rl.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
+			l.addView(rl,j+1);
 		}
 		
 		//adapter = new ArrayAdapter<Stop>(this,R.layout.item_layout,R.id.stop_text, list);
