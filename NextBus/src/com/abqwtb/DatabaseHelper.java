@@ -1,5 +1,6 @@
 package com.abqwtb;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,13 +41,17 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 	 * @throws IOException 
 	 * */
 	private void copyDataBase() throws IOException{
-		//SQLiteDatabase db = this.getReadableDatabase();
-		//db.close();
+		SQLiteDatabase db = this.getReadableDatabase();
+		db.close();
 		//Open your local db as the input stream
 		InputStream myInput;
 		myInput = myContext.getAssets().open("stops");
 
 		//Open the empty db as the output stream
+		File old = new File(DB_PATH);
+		if (!old.delete()){
+			Log.i("data", "Error Deleting Old Database");
+		}
 		OutputStream myOutput = new FileOutputStream(DB_PATH);
 
 		//transfer bytes from the inputfile to the outputfile
@@ -69,11 +74,12 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 			myDataBase = SQLiteDatabase.openDatabase(DB_PATH,null, 0);
 			Cursor c = myDataBase.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = 'version'", null);
 			if (c == null || c.getCount() < 1){
+				c.close();
 				myDataBase.close();
 				throw new Exception("Database is old");
 			}
 		}catch(Exception e){
-			//e.printStackTrace();
+			Log.i("data", e.getLocalizedMessage());
 			Log.v("databse","Copying Database");
 			copyDataBase();
 		}

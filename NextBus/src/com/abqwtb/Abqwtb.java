@@ -57,6 +57,7 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 
 	public void onClick(View v) {
 		int id = v.getId() - 300;
+		Log.v("click", ":"+id);
 		if (list[id].getId() >0){
 			Log.v("Main","StopId:"+list[id].getId());
 			Intent i = new Intent(Abqwtb.this, ScheduleView.class);
@@ -186,6 +187,7 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 				routes.add(cursor1.getInt(1));
 				cursor1.moveToNext();
 			}
+			cursor1.close();
 			stop_name_long += "("+cursor.getString(4)+")";
 			temp[i]  = new Stop(dist,stop_name,stop_name_long,cursor.getInt(0),routes);
 			i++;
@@ -203,9 +205,10 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 			colors.put(cursor1.getInt(0), Color.parseColor("#"+cursor1.getString(2)));
 			cursor1.moveToNext();
 		}
-		for (int j = 0; j < l.getChildCount(); j++) {
+		cursor1.close();
+		for (int j = l.getChildCount() - 1; j > -1; j--) {
 			View child = l.getChildAt(j);
-			if (child.getId() != R.id.stops_near)l.removeView(child);
+			if (child.getId() != R.id.stops_near)l.removeViewAt(j);
 		}
 		
 		for (int j = 0; j < list.length; j++) {
@@ -226,7 +229,7 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 				RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
 				p.addRule(RelativeLayout.BELOW, t.getId());
 				if (k>0)p.addRule(RelativeLayout.RIGHT_OF, 500+(100*j)+(k-1));
-				p.setMargins(15, 0, 0, 0);
+				p.setMargins(15, 0, 0, 5);
 				r.setPadding(2, 2, 2, 2);
 				r.setLayoutParams(p);
 				rl.addView(r);
@@ -239,6 +242,12 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 			rl.setId(j+300);
 			rl.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
 			rl.setBackgroundColor(Color.WHITE);
+			View line = new View(this);
+			RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,1);
+			p.addRule(RelativeLayout.BELOW, 500+(100*j));
+			line.setLayoutParams(p);
+			line.setBackgroundColor(Color.LTGRAY);
+			rl.addView(line);
 			l.addView(rl,j+1);
 		}
 		
