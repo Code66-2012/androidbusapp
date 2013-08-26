@@ -15,9 +15,11 @@ import com.google.analytics.tracking.android.EasyTracker;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -126,7 +128,8 @@ public class BusView extends Activity implements OnClickListener{
 	class UpdateThread extends Thread{
 		public void run() {
 			info = serverQuery(bus_id).split(":");
-			bmp = getBitmapMap("http://www.mapquestapi.com/staticmap/v3/getmap?key=Fmjtd%7Cluub290yn9%2Cbx%3Do5-96zs9y&center="+info[1]+","+info[2]+"&zoom=10&size=300,200&type=map&imagetype=jpeg&pois=pcenter,"+info[1]+","+info[2]+",5,0");
+			Display display = getWindowManager().getDefaultDisplay();
+			bmp = getBitmapMap("http://www.mapquestapi.com/staticmap/v3/getmap?key=Fmjtd%7Cluub290yn9%2Cbx%3Do5-96zs9y&center="+info[1]+","+info[2]+"&zoom=11&size="+(display.getWidth()-10)+","+display.getHeight()/2+"&type=map&imagetype=jpeg&pois=pcenter,"+info[1]+","+info[2]+",5,0");
 			mHandler.post(mUpdateResults);
 			mHandler.postDelayed(mUpdateRefresh, 60000);
 		}

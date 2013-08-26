@@ -224,6 +224,7 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 				TextView r = new TextView(this);
 				r.setTextSize(20f);
 				r.setId(500+(100*j)+k);
+				r.setTextColor(Color.WHITE);
 				r.setText(route+"");
 				r.setBackgroundColor(colors.get(route));
 				RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
