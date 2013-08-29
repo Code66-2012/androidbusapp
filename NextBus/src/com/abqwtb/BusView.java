@@ -129,7 +129,7 @@ public class BusView extends Activity implements OnClickListener{
 		public void run() {
 			info = serverQuery(bus_id).split(":");
 			Display display = getWindowManager().getDefaultDisplay();
-			bmp = getBitmapMap("http://www.mapquestapi.com/staticmap/v3/getmap?key=Fmjtd%7Cluub290yn9%2Cbx%3Do5-96zs9y&center="+info[1]+","+info[2]+"&zoom=11&size="+(display.getWidth()-10)+","+display.getHeight()/2+"&type=map&imagetype=jpeg&pois=pcenter,"+info[1]+","+info[2]+",5,0");
+			bmp = getBitmapMap("http://www.mapquestapi.com/staticmap/v3/getmap?key=Fmjtd%7Cluub290yn9%2Cbx%3Do5-96zs9y&center="+info[1]+","+info[2]+"&zoom=11&size=300,200&type=map&imagetype=jpeg&pois=pcenter,"+info[1]+","+info[2]+",5,0");
 			mHandler.post(mUpdateResults);
 			mHandler.postDelayed(mUpdateRefresh, 60000);
 		}

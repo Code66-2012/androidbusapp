@@ -2,23 +2,16 @@ package com.abqwtb;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import com.google.analytics.tracking.android.EasyTracker;
-
-import android.R.id;
 import android.app.Activity;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -34,12 +27,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
+
+import com.google.analytics.tracking.android.EasyTracker;
 
 public class Abqwtb extends Activity implements OnClickListener, OnTouchListener  {
 
@@ -50,9 +42,10 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 
 	static Stop[] list = new Stop[]{new Stop(0,"","Please Wait ...",0,null)};
 	private SQLiteDatabase db;
-	ArrayAdapter<Stop> adapter;
-	private String provider;
+	//ArrayAdapter<Stop> adapter;
+	//private String provider;
 	private LinearLayout l;
+	private SparseIntArray colors;
 
 
 	public void onClick(View v) {
@@ -75,16 +68,16 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 		setContentView(R.layout.main);
 		loadDatabase();
 
-		adapter = new ArrayAdapter<Stop>(this,R.layout.item_layout,R.id.stop_text, list);
+		//adapter = new ArrayAdapter<Stop>(this,R.layout.item_layout,R.id.stop_text, list);
 		//setListAdapter(adapter);
 
 		String context = Context.LOCATION_SERVICE; 
 		locationManager = (LocationManager) this.getSystemService(context); 
-		provider = LocationManager.NETWORK_PROVIDER; 
+		String provider = LocationManager.NETWORK_PROVIDER; 
 
 		loc = locationManager.getLastKnownLocation(provider);
 		l = (LinearLayout) findViewById(R.id.stops_layout);
-		reloadLocation();
+		
 
 		// Acquire a reference to the system Location Manager
 
@@ -122,6 +115,19 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 		}else{
 			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5*1000, 0, locationListener);
 		}
+		
+		colors = new SparseIntArray();
+		Cursor cursor1 = db.rawQuery("SELECT * FROM `routeinfo`",null);
+		cursor1.moveToFirst();
+		while(cursor1.isAfterLast() == false)
+		{
+			colors.put(cursor1.getInt(0), Color.parseColor("#"+cursor1.getString(2)));
+			cursor1.moveToNext();
+		}
+		cursor1.close();
+		
+		reloadLocation();
+		
 	}
 
 	@Override
@@ -197,15 +203,7 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 
 		list = temp;
 		
-		SparseIntArray colors = new SparseIntArray();
-		Cursor cursor1 = db.rawQuery("SELECT * FROM `routeinfo`",null);
-		cursor1.moveToFirst();
-		while(cursor1.isAfterLast() == false)
-		{
-			colors.put(cursor1.getInt(0), Color.parseColor("#"+cursor1.getString(2)));
-			cursor1.moveToNext();
-		}
-		cursor1.close();
+		
 		for (int j = l.getChildCount() - 1; j > -1; j--) {
 			View child = l.getChildAt(j);
 			if (child.getId() != R.id.stops_near)l.removeViewAt(j);
@@ -242,7 +240,7 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 			//rl.setBackgroundDrawable(getResources().getDrawable(R.drawable.colors));
 			rl.setId(j+300);
 			rl.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
-			rl.setBackgroundColor(Color.WHITE);
+			rl.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttonbackground));
 			View line = new View(this);
 			RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,1);
 			p.addRule(RelativeLayout.BELOW, 500+(100*j));
@@ -283,7 +281,7 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 		if (event.getAction() == MotionEvent.ACTION_DOWN){
 			v.setBackgroundColor(Color.DKGRAY);
 		}else if(event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL){
-			v.setBackgroundColor(Color.WHITE);
+			v.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttonbackground));
 		}
 		return false;
 	}
