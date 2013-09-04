@@ -9,4 +9,5 @@
     <string name="on_time">On Time</string>
     <string name="late">Minutes Late</string>
     <string name="wrefresh">Wait to Refresh</string>
+    <string name="early">Minutes Early</string>
 </resources>

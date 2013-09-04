@@ -20,6 +20,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.Gravity;
@@ -55,7 +56,7 @@ public class ScheduleView extends Activity implements OnTouchListener, OnClickLi
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		Bundle extras = getIntent().getExtras();
 
 		id = extras.getInt("com.abqwtb.stop_id");
@@ -72,7 +73,7 @@ public class ScheduleView extends Activity implements OnTouchListener, OnClickLi
 		}
 
 		db = myDbHelper.getDatabase();
-		
+
 		colors = new SparseIntArray();
 		Cursor cursor1 = db.rawQuery("SELECT * FROM `routeinfo`",null);
 		cursor1.moveToFirst();
@@ -82,8 +83,8 @@ public class ScheduleView extends Activity implements OnTouchListener, OnClickLi
 			cursor1.moveToNext();
 		}
 		cursor1.close();
-		
-		
+
+
 		if (savedInstanceState != null && savedInstanceState.containsKey("schedule")){
 			schedule = (ArrayList<Trip>) savedInstanceState.getSerializable("schedule");
 			updateUI();
@@ -136,29 +137,36 @@ public class ScheduleView extends Activity implements OnTouchListener, OnClickLi
 					for (int i = 0; i < sched.length; i++) {
 						String[] data = sched[i].split(";");
 						Date dateObj;
+						Trip t = null;
 						try {
 							dateObj = sdf.parse(data[0]);
 							DateFormat df = DateFormat.getTimeInstance();
-							String late = data[2];
-
-							if (late.equals("-1")){
-								late = "";
-
-							}else if(late.equals("0")){
-								late = getString(R.string.on_time);
-							}else{
-								NumberFormat nf = NumberFormat.getInstance();
-								nf.setMaximumFractionDigits(1);
-								float time_late = Float.parseFloat(late);
-								late = "~" +  nf.format(time_late / 60) + " "+getString(R.string.late);
-
-							}
-
-							schedule.add(new Trip(df.format(dateObj)+" "+late,data[3],data[1]));
-
+							t = new Trip(df.format(dateObj),data[3],data[1]);
 						} catch (ParseException e) {
 							e.printStackTrace();
 						}
+						
+						String late = data[2];
+
+						if (late.equals("-1")){
+							late = "";
+						}else if(late.equals("0")){
+							late = getString(R.string.on_time);
+						}else if(Float.parseFloat(late) > 0){
+							NumberFormat nf = NumberFormat.getInstance();
+							nf.setMaximumFractionDigits(1);
+							float time_late = Float.parseFloat(late);
+							late = nf.format(time_late / 60) + " "+getString(R.string.late);
+							t.setStatus((short) 2);
+						}else{
+							NumberFormat nf = NumberFormat.getInstance();
+							nf.setMaximumFractionDigits(1);
+							float time_late = Float.parseFloat(late);
+							late = nf.format(Math.abs(time_late) / 60) + " "+getString(R.string.early);
+							t.setStatus((short) 3);
+						}
+						t.append(" "+late);
+						schedule.add(t);
 					}
 				}
 				mHandler.post(mUpdateResults);
@@ -175,7 +183,7 @@ public class ScheduleView extends Activity implements OnTouchListener, OnClickLi
 		top.setOrientation(LinearLayout.VERTICAL);
 		setContentView(top);
 		TextView title = new TextView(this);
-		title.setTextSize(24f);
+		title.setTextSize(22f);
 		title.setText(name+" "+getString(R.string.schedule));
 		top.addView(title);
 		for (int i = 0; i < schedule.size(); i++) {
@@ -183,17 +191,23 @@ public class ScheduleView extends Activity implements OnTouchListener, OnClickLi
 			ll.setId(i+2000);
 			TextView r = new TextView(this);
 			r.setText(schedule.get(i).getRoute());
+			r.setPadding(dpToPx(3), 0, dpToPx(3), 0);
 			r.setTextColor(Color.WHITE);
 			r.setTextSize(20f);
 			r.setGravity(Gravity.CENTER);
 			r.setBackgroundColor(colors.get(Integer.parseInt(schedule.get(i).getRoute())));
-			LayoutParams p = new LinearLayout.LayoutParams(25, 25);
-			p.setMargins(5, 0, 10, 0);
+			LayoutParams p = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			p.setMargins(dpToPx(3), 0, dpToPx(5), 0);
 			r.setLayoutParams(p);
 			ll.addView(r);
 			TextView main_time = new TextView(this);
 			main_time.setText(schedule.get(i).toString());
-			main_time.setTextSize(26f);
+			main_time.setTextSize(24f);
+			if (schedule.get(i).getStatus() == 3){
+				main_time.setBackgroundColor(Color.YELLOW);
+			}else if(schedule.get(i).getStatus() == 2){
+				main_time.setBackgroundColor(Color.RED);
+			}
 			ll.addView(main_time);
 			ll.setOnTouchListener(this);
 			ll.setOnClickListener(this);
@@ -202,6 +216,7 @@ public class ScheduleView extends Activity implements OnTouchListener, OnClickLi
 			LayoutParams p1 = new LayoutParams(LayoutParams.MATCH_PARENT,1);
 			line.setLayoutParams(p1);
 			line.setBackgroundColor(Color.LTGRAY);
+			top.addView(line);
 		}
 	}
 
@@ -211,7 +226,7 @@ public class ScheduleView extends Activity implements OnTouchListener, OnClickLi
 		String inputLine = null;
 		try {
 			Log.v("Main","Loading from url...");
-			URL url = new URL("http://www.abqwtb.com/android.php?version=5&stop_id="+id);
+			URL url = new URL("http://www.abqwtb.com/android.php?version=6&stop_id="+id);
 			conn = url.openConnection();
 			BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 			while ((inputLine = in.readLine()) != null){ 
@@ -230,7 +245,7 @@ public class ScheduleView extends Activity implements OnTouchListener, OnClickLi
 		super.onSaveInstanceState(outState);
 		outState.putSerializable("sched", schedule);
 	}
-	
+
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		if (event.getAction() == MotionEvent.ACTION_DOWN){
@@ -239,6 +254,12 @@ public class ScheduleView extends Activity implements OnTouchListener, OnClickLi
 			v.setBackgroundColor(Color.WHITE);
 		}
 		return false;
+	}
+
+	public int dpToPx(int dp) {
+		DisplayMetrics displayMetrics = getBaseContext().getResources().getDisplayMetrics();
+		int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));       
+		return px;
 	}
 
 }

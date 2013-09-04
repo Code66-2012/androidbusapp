@@ -8,4 +8,5 @@
     <string name="on_time">A Tiempo</string>
     <string name="late">Minutos Tarde</string>
     <string name="wrefresh">Espera para Actualizar</string>
+    <string name="early">Minutos Temprano</string>
 </resources>

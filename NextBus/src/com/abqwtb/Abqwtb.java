@@ -12,11 +12,13 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.Menu;
@@ -70,10 +72,13 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 
 		//adapter = new ArrayAdapter<Stop>(this,R.layout.item_layout,R.id.stop_text, list);
 		//setListAdapter(adapter);
-
+		
+		Criteria crit = new Criteria();
+		crit.setAltitudeRequired(false);
+		
 		String context = Context.LOCATION_SERVICE; 
 		locationManager = (LocationManager) this.getSystemService(context); 
-		String provider = LocationManager.NETWORK_PROVIDER; 
+		String provider = locationManager.getBestProvider(crit, true); 
 
 		loc = locationManager.getLastKnownLocation(provider);
 		l = (LinearLayout) findViewById(R.id.stops_layout);
@@ -211,42 +216,42 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 		
 		for (int j = 0; j < list.length; j++) {
 			RelativeLayout rl = new RelativeLayout(this);
-			TextView t = new TextView(this);
-			t.setTextSize(24.00f);
-			t.setId(j+100);
-			t.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT));
-			t.setText(list[j].toString());
-			rl.addView(t);
 			int k = 0;
 			for (Integer route : list[j].getRoutes()) {
 				TextView r = new TextView(this);
-				r.setTextSize(20f);
+				r.setTextSize(18f);
 				r.setId(500+(100*j)+k);
 				r.setTextColor(Color.WHITE);
 				r.setText(route+"");
 				r.setBackgroundColor(colors.get(route));
 				RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
-				p.addRule(RelativeLayout.BELOW, t.getId());
+				//p.addRule(RelativeLayout.BELOW, t.getId());
 				if (k>0)p.addRule(RelativeLayout.RIGHT_OF, 500+(100*j)+(k-1));
-				p.setMargins(15, 0, 0, 5);
-				r.setPadding(2, 2, 2, 2);
+				p.setMargins(dpToPx(5), dpToPx(4), 0, dpToPx(4));
+				r.setPadding(dpToPx(3), 0, dpToPx(3), 0);
 				r.setLayoutParams(p);
 				rl.addView(r);
 				
 				k++;
 			}
+			TextView t = new TextView(this);
+			t.setTextSize(20.00f);
+			t.setId(j+100);
+			RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
+			p.addRule(RelativeLayout.RIGHT_OF, 500+(100*j)+(k-1));
+			p.setMargins(dpToPx(6), 0, 0, 0);
+			t.setLayoutParams(p);
+			t.setPadding(0, dpToPx(3), 0, dpToPx(3));
+			t.setText(list[j].toString());
+			rl.addView(t);
 			rl.setOnClickListener(this);
 			rl.setOnTouchListener(this);
 			//rl.setBackgroundDrawable(getResources().getDrawable(R.drawable.colors));
 			rl.setId(j+300);
-			rl.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
+			LinearLayout.LayoutParams p1 = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+			p1.setMargins(dpToPx(1), dpToPx(1), dpToPx(1), dpToPx(1));
+			rl.setLayoutParams(p1);
 			rl.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttonbackground));
-			View line = new View(this);
-			RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,1);
-			p.addRule(RelativeLayout.BELOW, 500+(100*j));
-			line.setLayoutParams(p);
-			line.setBackgroundColor(Color.LTGRAY);
-			rl.addView(line);
 			l.addView(rl,j+1);
 		}
 		
@@ -284,6 +289,12 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 			v.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttonbackground));
 		}
 		return false;
+	}
+	
+	public int dpToPx(int dp) {
+	    DisplayMetrics displayMetrics = getBaseContext().getResources().getDisplayMetrics();
+	    int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));       
+	    return px;
 	}
 
 }
