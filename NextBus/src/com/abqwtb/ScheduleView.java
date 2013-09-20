@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -20,6 +22,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -29,7 +32,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
@@ -130,7 +132,22 @@ public class ScheduleView extends Activity implements OnTouchListener, OnClickLi
 				if (times.contains("No More Stops Today")){
 					schedule = new ArrayList<Trip>();
 					schedule.add(new Trip("No more busses were found for today", "0", "0"));
-				}else{
+				}else if (!times.contains("|")){
+					Looper.prepare();
+					AlertDialog.Builder builder = new AlertDialog.Builder(ScheduleView.this);
+					builder.setTitle("No Data");
+					builder.setMessage("The server didn't respond, you may be offline.");
+					builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.cancel();
+							finish();
+						}
+					});
+					builder.show();
+					Looper.loop();
+				}
+				else{
 					sched = times.split("\\|");
 					final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 					schedule = new ArrayList<Trip>();
@@ -146,8 +163,11 @@ public class ScheduleView extends Activity implements OnTouchListener, OnClickLi
 							e.printStackTrace();
 						}
 						
-						String late = data[2];
-
+						String late = "-1";
+						if (data.length > 1){
+							late = data[2];
+						}
+						
 						if (late.equals("-1")){
 							late = "";
 						}else if(late.equals("0")){

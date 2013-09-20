@@ -79,8 +79,9 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 		String context = Context.LOCATION_SERVICE; 
 		locationManager = (LocationManager) this.getSystemService(context); 
 		String provider = locationManager.getBestProvider(crit, true); 
-
-		loc = locationManager.getLastKnownLocation(provider);
+		if (provider != null){
+			loc = locationManager.getLastKnownLocation(provider);
+		}
 		l = (LinearLayout) findViewById(R.id.stops_layout);
 		
 

@@ -90,13 +90,16 @@ public class BusView extends MapActivity{
 	}
 
 	protected void updateUI() {
-		GeoPoint buspoint = new GeoPoint(Float.parseFloat(info[1]), Float.parseFloat(info[2]));
-		map.getController().setCenter(buspoint);
-
-		OverlayItem busoverlay = new OverlayItem(buspoint, bus_id, getString(R.string.next_stop)+":  "+info[0]);
-		poiOverlay.clear();
-		poiOverlay.addItem(busoverlay);
-		annotation.showAnnotationView(busoverlay);
+		if (info.length > 1){
+			GeoPoint buspoint = new GeoPoint(Float.parseFloat(info[1]), Float.parseFloat(info[2]));
+			if (buspoint != null){
+				map.getController().setCenter(buspoint);
+				OverlayItem busoverlay = new OverlayItem(buspoint, bus_id, getString(R.string.next_stop)+":  "+info[0]);
+				poiOverlay.clear();
+				poiOverlay.addItem(busoverlay);
+				annotation.showAnnotationView(busoverlay);
+			}
+		}
 		//		ImageView map = (ImageView) findViewById(R.id.busMap);
 		//		map.setImageBitmap(bmp);
 		//TextView v = (TextView) findViewById(R.id.bus_id);
