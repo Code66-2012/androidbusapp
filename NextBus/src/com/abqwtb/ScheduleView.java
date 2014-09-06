@@ -23,10 +23,14 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -37,7 +41,7 @@ import android.widget.TextView;
 
 import com.google.analytics.tracking.android.EasyTracker;
 
-public class ScheduleView extends Activity implements OnTouchListener, OnClickListener {
+public class ScheduleView extends ActionBarActivity implements OnTouchListener, OnClickListener {
 
 	private String[] sched;
 	private ArrayList<Trip> schedule = new ArrayList<Trip>();
@@ -280,6 +284,28 @@ public class ScheduleView extends Activity implements OnTouchListener, OnClickLi
 		DisplayMetrics displayMetrics = getBaseContext().getResources().getDisplayMetrics();
 		int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));       
 		return px;
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.schedule_menu, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	long last_refreshed = 0;
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.action_refresh_schedule){
+			//Log.i("time",(System.nanoTime() - last_refreshed)+"");
+			if (System.nanoTime() - last_refreshed > (30 * 1000000000l)){
+				last_refreshed = System.nanoTime();
+				refreshSched();
+			}
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 }

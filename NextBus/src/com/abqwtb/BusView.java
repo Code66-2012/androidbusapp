@@ -2,56 +2,43 @@ package com.abqwtb;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import com.google.analytics.tracking.android.EasyTracker;
-import com.mapquest.android.maps.AnnotationView;
-import com.mapquest.android.maps.DefaultItemizedOverlay;
-import com.mapquest.android.maps.GeoPoint;
-import com.mapquest.android.maps.ItemizedOverlay;
-import com.mapquest.android.maps.MapActivity;
-import com.mapquest.android.maps.MapView;
-import com.mapquest.android.maps.MyLocationOverlay;
-import com.mapquest.android.maps.Overlay;
-import com.mapquest.android.maps.OverlayItem;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.Display;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-public class BusView extends MapActivity{
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+public class BusView extends FragmentActivity{
 
 	//Bitmap bmp;
 	String[] info;
 	//Button refresh;
 
-	private MapView map;
+	private GoogleMap map;
 
 	final Handler mHandler = new Handler();
 
-		final Runnable mUpdateRefresh = new Runnable() {
-			@Override
-			public void run() {
-				new UpdateThread().start();
-			}
-		};
+	final Runnable mUpdateRefresh = new Runnable() {
+		@Override
+		public void run() {
+			new UpdateThread().start();
+		}
+	};
 
 	final Runnable mUpdateResults = new Runnable() {
 		@Override
@@ -59,29 +46,37 @@ public class BusView extends MapActivity{
 			updateUI();
 		}
 	};
-	
+
 	private String bus_id;
+	private Marker mark;
 
-	private DefaultItemizedOverlay poiOverlay;
+	//private DefaultItemizedOverlay poiOverlay;
 
-	private AnnotationView annotation;
+	//private AnnotationView annotation;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map);
 
-		map = (MapView) findViewById(R.id.map);
-		map.setBuiltInZoomControls(true);
-
+		map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.busmap)).getMap();
+		//map.setBuiltInZoomControls(true);
+		map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+		CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(35.078581, -106.6764191), 14);
+		map.moveCamera(update);
+		
+		mark = map.addMarker(new MarkerOptions()
+        .position(new LatLng(35.078581, -106.6764191))
+        .title("Hello world"));
 		bus_id = getIntent().getExtras().getString("com.abqwtb.bus_id");
 
-		Drawable icon = getResources().getDrawable(R.drawable.location_marker);
-		poiOverlay = new DefaultItemizedOverlay(icon);
+		//Drawable icon = getResources().getDrawable(R.drawable.location_marker);
+		//poiOverlay = new DefaultItemizedOverlay(icon);
 
-		annotation = new AnnotationView(map);
-		map.getController().setZoom(14);
-		map.getOverlays().add(poiOverlay);
+		//annotation = new AnnotationView(map);
+		//annotation.tryToKeepBubbleOnScreen(true);
+		//map.getController().setZoom(14);
+		//map.getOverlays().add(poiOverlay);
 		//refresh = (Button) findViewById(R.id.bus_refresh);
 		//refresh.setEnabled(false);
 		//refresh.setOnClickListener(this);
@@ -91,14 +86,13 @@ public class BusView extends MapActivity{
 
 	protected void updateUI() {
 		if (info.length > 1){
-			GeoPoint buspoint = new GeoPoint(Float.parseFloat(info[1]), Float.parseFloat(info[2]));
-			if (buspoint != null){
-				map.getController().setCenter(buspoint);
-				OverlayItem busoverlay = new OverlayItem(buspoint, bus_id, getString(R.string.next_stop)+":  "+info[0]);
-				poiOverlay.clear();
-				poiOverlay.addItem(busoverlay);
-				annotation.showAnnotationView(busoverlay);
-			}
+			LatLng pos = new LatLng(Double.parseDouble(info[1]), Double.parseDouble(info[2]));
+			CameraUpdate update = CameraUpdateFactory.newLatLng(pos);
+			mark.setPosition(pos);
+			map.animateCamera(update);
+			
+			//annotation.showAnnotationView(busoverlay);
+
 		}
 		//		ImageView map = (ImageView) findViewById(R.id.busMap);
 		//		map.setImageBitmap(bmp);
@@ -106,23 +100,23 @@ public class BusView extends MapActivity{
 		//v.setText(bus_id + " "+getString(R.string.next_stop)+":  "+info[0]);
 	}
 
-//	public static Bitmap getBitmapMap(String src) {
-//		try {
-//			Log.v("src",src);
-//			URL url = new URL(src);
-//			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//			connection.setDoInput(true);
-//			connection.connect();
-//			InputStream input = connection.getInputStream();
-//			Bitmap myBitmap = BitmapFactory.decodeStream(input);
-//			Log.v("Bitmap","returned");
-//			return myBitmap;
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			Log.e("Exception",e.getMessage());
-//			return null;
-//		}
-//	}
+	//	public static Bitmap getBitmapMap(String src) {
+	//		try {
+	//			Log.v("src",src);
+	//			URL url = new URL(src);
+	//			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+	//			connection.setDoInput(true);
+	//			connection.connect();
+	//			InputStream input = connection.getInputStream();
+	//			Bitmap myBitmap = BitmapFactory.decodeStream(input);
+	//			Log.v("Bitmap","returned");
+	//			return myBitmap;
+	//		} catch (IOException e) {
+	//			e.printStackTrace();
+	//			Log.e("Exception",e.getMessage());
+	//			return null;
+	//		}
+	//	}
 
 	private String serverQuery(String id){
 		URLConnection conn = null;
@@ -155,12 +149,12 @@ public class BusView extends MapActivity{
 		EasyTracker.getInstance().activityStop(this);
 	}
 
-//	@Override
-//	public void onClick(View v) {
-//		//		refresh.setEnabled(false);
-//		//		refresh.setText(R.string.wrefresh);
-//		new UpdateThread().start();		
-//	}
+	//	@Override
+	//	public void onClick(View v) {
+	//		//		refresh.setEnabled(false);
+	//		//		refresh.setText(R.string.wrefresh);
+	//		new UpdateThread().start();		
+	//	}
 
 	class UpdateThread extends Thread{
 		public void run() {
@@ -183,10 +177,5 @@ public class BusView extends MapActivity{
 		new UpdateThread().start();
 		super.onResume();
 	}
-
-	@Override
-	protected boolean isRouteDisplayed() {
-		return false;
-	};
 
 }

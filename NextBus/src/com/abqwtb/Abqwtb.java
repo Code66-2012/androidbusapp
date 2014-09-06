@@ -18,6 +18,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -35,7 +36,7 @@ import android.widget.TextView;
 
 import com.google.analytics.tracking.android.EasyTracker;
 
-public class Abqwtb extends Activity implements OnClickListener, OnTouchListener  {
+public class Abqwtb extends ActionBarActivity implements OnClickListener, OnTouchListener  {
 
 	LocationManager locationManager;
 	LocationListener locationListener;
@@ -179,7 +180,7 @@ public class Abqwtb extends Activity implements OnClickListener, OnTouchListener
 		//latitude = 35.075896;
 		//Log.v("Location",latitude+" "+longitude);
 
-		Cursor cursor = db.rawQuery("SELECT * FROM `stops` WHERE `lat` > "+(latitude-0.006)+" AND `lat` < "+(latitude+0.006)+" AND `lon` > "+(longitude-0.006)+" AND `lon` < "+(longitude+0.006)+"", null);
+		Cursor cursor = db.rawQuery("SELECT * FROM `stops` ORDER BY ((`lat` - "+latitude+") * (`lat` - "+latitude+") + (`lon` - "+longitude+") * (`lon` - "+longitude+")) LIMIT 50", null);
 
 
 		cursor.moveToFirst();
